@@ -20,6 +20,5 @@ def get_files_by_category(root='samples', verbose=False):
     return result
 
 
-
 if __name__ == '__main__':
     util.json_dump(get_files_by_category())

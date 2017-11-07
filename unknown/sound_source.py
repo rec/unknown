@@ -2,7 +2,7 @@ import wave
 
 NCHANNELS = 2
 SAMPWIDTH = 2
-FRAMESIZE = NCHANNELS * SAMPWIDTH
+FRAME_SIZE = NCHANNELS * SAMPWIDTH
 FRAMERATE = 48000
 
 
@@ -15,12 +15,12 @@ def open_wave_for_write(filename):
 
 
 class SoundSource:
-    def __init__(self, file, fade_frames):
+    def __init__(self, file, fade_frames, open=wave.open):
         self.byte_index = 0
-        with wave.open(file) as fp:
+        with open(file) as fp:
             self.frames = fp.readframes(fp.nframes())
         self.fade_in_bytes = fade_frames * FRAME_SIZE
-        self.fade_out_bytes = len(frames) - self.fade_in_bytes
+        self.fade_out_bytes = len(self.frames) - self.fade_in_bytes
 
     def in_fade_out(self):
         return self.byte_index >= self.fade_out_bytes
@@ -35,7 +35,7 @@ class SoundSource:
         if self.in_fade_in():
             fade = self.byte_index / self.fade_in_bytes
         elif self.in_fade_out():
-            fade = (len(frames) - self.byte_index) / self.fade_in_bytes
+            fade = (len(self.frames) - self.byte_index) / self.fade_in_bytes
         else:
             fade = 1
 

@@ -6,8 +6,8 @@ from . import sound_source
 # If SPACING_TIME is positive, then the start of the next source file is
 # delayed by that many seconds.  The default is 0
 #
-# For example, if FADE_TIME = 0 and SPACING_TIME = 0, then each sample is played
-# right after the other with no pause.
+# For example, if FADE_TIME = 0 and SPACING_TIME = 0, then each sample is
+# played right after the other with no pause.
 #
 # If FADE_TIME = 3 and SPACING_TIME = 0 then starting 3 seconds before the end
 # of each file, the first sample fades out and the second one fades in.
@@ -29,7 +29,7 @@ class CombineSources:
         self.finished = bool(files)
         self.source = self.next_source()
         self.incoming_source = None
-        self.fade_frames = fade_time * FRAMERATE
+        self.fade_frames = fade_time * sound_source.FRAME_RATE
 
     def next_frame(self):
         """Return the next frame as a pair of numbers between 0 and 65536"""
@@ -54,4 +54,5 @@ class CombineSources:
 
     def next_source(self):
         if self.files:
-            return sound_source.SoundSource(self.files.pop(0), self.fade_frames)
+            return sound_source.SoundSource(
+                self.files.pop(0), self.fade_frames)
