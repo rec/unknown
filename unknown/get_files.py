@@ -1,4 +1,5 @@
-import json, os, sys
+import os
+from . import util
 
 SUFFIXES = '.aif', '.aiff', '.flac', '.mp3', '.wav'
 
@@ -21,4 +22,4 @@ def get_files_by_category(root='samples', verbose=False):
 
 
 if __name__ == '__main__':
-    json.dump(get_files_by_category(), sys.stdout, indent=2)
+    util.json_dump(get_files_by_category())

@@ -1,17 +1,18 @@
-import os, pydub
-from . import get_files
+import pydub, sys
+from . import get_files, util
 
 
-def print_time(duration, name, use_hours):
+def format_time(duration, use_hours=False):
     m, s = divmod(round(duration), 60)
     if use_hours:
         h, m = divmod(m, 60)
-        print('%d:%02d:%02d - %s' % (h, m, s, name))
+        return '%d:%02d:%02d' % (h, m, s)
     else:
-        print('%02d:%02d - %s' % (m, s, name))
+        return '%02d:%02d' % (m, s)
 
 
 def file_durations():
+    result = {}
     for name, files in sorted(get_files.get_files_by_category().items()):
         total_duration = 0
         for file in files:
@@ -20,14 +21,18 @@ def file_durations():
             except KeyboardInterrupt:
                 raise
             except:
-                print('ERROR: couldn\'t read file', file)
+                print('ERROR: couldn\'t read file', file, file=sys.stderr)
             else:
-                print_time(duration, os.path.basename(file), True)
                 total_duration += duration
+                duration = format_time(duration)
+                result.setdefault(name, {})[file] = duration
+                print(duration, 'for', file, file=sys.stderr)
 
-        print_time(total_duration, name, True)
-        print()
+        print(name, '--', format_time(total_duration, True), file=sys.stderr)
+
+    return result
 
 
 if __name__ == '__main__':
-    file_durations()
+    durations = file_durations()
+    util.json_dump(durations)
