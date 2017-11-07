@@ -15,9 +15,9 @@ def open_wave_for_write(filename):
 
 
 class SoundSource:
-    def __init__(self, file, fade_frames, open=wave.open):
+    def __init__(self, file, fade_frames, wave_open=None):
         self.byte_index = 0
-        with open(file) as fp:
+        with (wave_open or wave.open)(file) as fp:
             self.frames = fp.readframes(fp.nframes())
         self.fade_in_bytes = fade_frames * FRAME_SIZE
         self.fade_out_bytes = len(self.frames) - self.fade_in_bytes

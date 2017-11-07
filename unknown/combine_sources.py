@@ -19,17 +19,14 @@ from . import sound_source
 # in its last three seconds, and then the next sample fades in in 3 seconds.
 
 
-def _running(source):
-    return source and source.running()
-
-
 class CombineSources:
-    def __init__(self, *files, fade_time=3):
+    def __init__(self, *files, fade_time=3, wave_open=None):
         self.files = list(files)
         self.finished = bool(files)
         self.source = self.next_source()
         self.incoming_source = None
         self.fade_frames = fade_time * sound_source.FRAME_RATE
+        self.wave_open = wave_open
 
     def next_frame(self):
         """Return the next frame as a pair of numbers between 0 and 65536"""
@@ -53,6 +50,5 @@ class CombineSources:
         return l1 + l2, r1 + r1
 
     def next_source(self):
-        if self.files:
-            return sound_source.SoundSource(
-                self.files.pop(0), self.fade_frames)
+        return self.files and sound_source.SoundSource(
+            self.files.pop(0), self.fade_frames, self.wave_open)
