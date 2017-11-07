@@ -1,29 +1,29 @@
 import unittest
 from unknown import sound_source
 
+MOCK_FILES = {
+    'simple.wav': (
+        (0x0000, 0x0000),
+    ),
+    'biramp.wav': (
+        (0x0000, 0xffff),
+        (0x1000, 0xefff),
+        (0x2000, 0xdfff),
+        (0x3000, 0xcfff),
+        (0x4000, 0xbfff),
+        (0x5000, 0xafff),
+        (0x6000, 0x9fff),
+        (0x7000, 0x8fff),
+        (0x8000, 0x7fff),
+    ),
+}
+
 
 class MockWave:
-    MOCK_FILES = {
-        'simple.wav': (
-            (0x0000, 0x0000),
-        ),
-        'biramp.wav': (
-            (0x0000, 0xFFFF),
-            (0x1000, 0xEFFF),
-            (0x2000, 0xDFFF),
-            (0x3000, 0xCFFF),
-            (0x4000, 0xBFFF),
-            (0x5000, 0xAFFF),
-            (0x6000, 0x9FFF),
-            (0x7000, 0x8FFF),
-            (0x8000, 0x7FFF),
-        ),
-    }
-
     def __init__(self, name):
         as_bytes = []
-        for l, r in self.MOCK_FILES[name]:
-            as_bytes.extend(reversed(divmod(r, 256) + divmod(r, 256)))
+        for l, r in MOCK_FILES[name]:
+            as_bytes.extend(reversed(divmod(r, 256) + divmod(l, 256)))
         self.frames = bytes(as_bytes)
 
     def readframes(self, _):
@@ -51,4 +51,7 @@ class SoundSourceTest(unittest.TestCase):
         self.assertEqual(list(expected), actual)
 
     def test_simple(self):
-        self.assert_frames('simple.wav', (0x0000, 0x0000))
+        self.assert_frames('simple.wav', *MOCK_FILES['simple.wav'])
+
+    def test_biramp(self):
+        self.assert_frames('biramp.wav', *MOCK_FILES['biramp.wav'])
