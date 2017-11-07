@@ -28,16 +28,19 @@ class CombineSources:
         self.fade_frames = fade_time * sound_source.FRAME_RATE
         self.wave_open = wave_open
 
-    def next_frame(self):
+    def __iter__(self):
+        return self
+
+    def __next__(self):
         """Return the next frame as a pair of numbers between 0 and 65536"""
         frame = self.source.next_frame()
 
         if not frame:
             self.source = self.incoming_source or self.next_source()
             self.incoming_source = None
-            if not self.source:
-                return
-            frame = self.source.next_frame()
+            frame = self.source and self.source.next_frame()
+            if not frame:
+                raise StopIteration
 
         if not self.incoming_source and self.source.in_fade_out():
             self.incoming_source = self.next_source()

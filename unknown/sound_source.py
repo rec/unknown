@@ -28,9 +28,12 @@ class SoundSource:
     def in_fade_in(self):
         return self.byte_index < self.fade_in_bytes
 
-    def next_frame(self):
+    def __iter__(self):
+        return self
+
+    def __next__(self):
         if self.byte_index >= len(self.frames):
-            return
+            raise StopIteration
 
         if self.in_fade_in():
             fade = self.byte_index / self.fade_in_bytes
