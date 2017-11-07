@@ -101,5 +101,6 @@ ENV/
 .mypy_cache/
 
 samples/
+source_samples/
 
 *.wav
