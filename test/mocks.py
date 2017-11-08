@@ -52,10 +52,9 @@ class MockWave:
         pass
 
 
-def compare(expected, actual):
+def compare(expected, actual, test):
     actual, expected = list(actual), list(expected)
-    if expected == actual:
-        return True
-
-    for a in actual:
-        print('(0x%04x, 0x%04x),' % a)
+    if expected != actual:
+        for a in actual:
+            print('(0x%04x, 0x%04x),' % a)
+        test.assertEqual(expected, actual)

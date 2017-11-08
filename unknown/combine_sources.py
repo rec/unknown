@@ -35,6 +35,9 @@ class CombineSources:
         if not self.source:
             raise StopIteration
 
+        if not self.incoming_source and self.source.in_fade_out():
+            self.incoming_source = self.next_source()
+
         try:
             frame = next(self.source)
         except StopIteration:
@@ -44,9 +47,6 @@ class CombineSources:
 
             self.incoming_source = None
             frame = next(self.source)
-
-        if not self.incoming_source and self.source.in_fade_out():
-            self.incoming_source = self.next_source()
 
         if not self.incoming_source:
             return frame

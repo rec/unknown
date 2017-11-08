@@ -6,7 +6,7 @@ from unknown import sound_source
 class SoundSourceTest(unittest.TestCase):
     def assert_frames(self, name, *expected, fade_frames=0):
         source = sound_source.SoundSource(name, fade_frames, mocks.MockWave)
-        self.assertTrue(mocks.compare(expected, source))
+        mocks.compare(expected, source, self)
 
     def test_simple(self):
         self.assert_frames('simple.wav', *mocks.FILES['simple.wav'])

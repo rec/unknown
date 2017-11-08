@@ -31,6 +31,11 @@ class SoundSource:
     def __iter__(self):
         return self
 
+    def __str__(self):
+        return 'byte_index = %s(%s), in = %s, out = %s' % (
+            self.byte_index, len(self.frames), self.fade_in_bytes,
+            self.fade_out_bytes)
+
     def __next__(self):
         if self.byte_index >= len(self.frames):
             raise StopIteration
