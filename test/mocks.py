@@ -50,3 +50,12 @@ class MockWave:
 
     def __exit__(self, exc_type, exc_value, traceback):
         pass
+
+
+def compare(expected, actual):
+    actual, expected = list(actual), list(expected)
+    if expected == actual:
+        return True
+
+    for a in actual:
+        print('(0x%04x, 0x%04x),' % a)
