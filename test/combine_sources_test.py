@@ -4,44 +4,35 @@ from unknown import combine_sources
 
 
 class CombineSourcesTest(unittest.TestCase):
-    def test_empty(self):
+    def run_test(self, expected, fade_frames, *files):
         combined = combine_sources.CombineSources(
-            wave_open=mocks.MockWave, fade_frames=0)
-        mocks.compare((), combined, self)
+            fade_frames, *files,
+            wave_open=mocks.MockWave)
+        mocks.compare(expected, combined, self)
+
+    def test_empty(self):
+        self.run_test((), 0)
+        self.run_test((), 3)
 
     def test_single(self):
-        combined = combine_sources.CombineSources(
-            'biramp.wav', wave_open=mocks.MockWave, fade_frames=0)
-        mocks.compare(SINGLE, combined, self)
+        self.run_test(SINGLE, 0, 'biramp.wav')
 
     def test_single_with_fade(self):
-        combined = combine_sources.CombineSources(
-            'biramp.wav', wave_open=mocks.MockWave, fade_frames=3)
-        mocks.compare(SINGLE_WITH_FADE, combined, self)
+        self.run_test(SINGLE_WITH_FADE, 3, 'biramp.wav')
 
     def test_double_without_fade(self):
-        combined = combine_sources.CombineSources(
-            'biramp.wav', 'biramp.wav',
-            wave_open=mocks.MockWave, fade_frames=0)
-        mocks.compare(DOUBLE_WITHOUT_FADE, combined, self)
+        self.run_test(DOUBLE_WITHOUT_FADE, 0, 'biramp.wav', 'biramp.wav')
 
     def test_double_with_fade(self):
-        combined = combine_sources.CombineSources(
-            'biramp.wav', 'biramp.wav',
-            wave_open=mocks.MockWave, fade_frames=3)
-        mocks.compare(DOUBLE_WITH_FADE, combined, self)
+        self.run_test(DOUBLE_WITH_FADE, 3, 'biramp.wav', 'biramp.wav')
 
     def test_combine_without_fade(self):
-        combined = combine_sources.CombineSources(
-            'biramp.wav', 'biramp.wav', 'biramp2.wav',
-            wave_open=mocks.MockWave, fade_frames=0)
-        mocks.compare(COMBINE_WITHOUT_FADE, combined, self)
+        self.run_test(COMBINE_WITHOUT_FADE, 0,
+                      'biramp.wav', 'biramp.wav', 'biramp2.wav')
 
     def test_combine_with_fade(self):
-        combined = combine_sources.CombineSources(
-            'biramp.wav', 'biramp.wav', 'biramp2.wav',
-            wave_open=mocks.MockWave)
-        mocks.compare(COMBINE_WITH_FADE, combined, self)
+        self.run_test(COMBINE_WITH_FADE, 3,
+                      'biramp.wav', 'biramp.wav', 'biramp2.wav')
 
 
 SINGLE = (

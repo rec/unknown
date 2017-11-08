@@ -1,26 +1,8 @@
 from . import sound_source
 
-# If FADE_TIME is positive, then there is a fade between consecutive pairs of
-# source files of that many seconds.
-#
-# If SPACING_TIME is positive, then the start of the next source file is
-# delayed by that many seconds.  The default is 0
-#
-# For example, if FADE_TIME = 0 and SPACING_TIME = 0, then each sample is
-# played right after the other with no pause.
-#
-# If FADE_TIME = 3 and SPACING_TIME = 0 then starting 3 seconds before the end
-# of each file, the first sample fades out and the second one fades in.
-#
-# If FADE_TIME = 0 and SPACING_TIME = 3 then each sample is played
-# right after the other with a three second pause pause.
-#
-# If FADE_TIME = 3 and SPACING_TIME = 3 then each sample fades to nothing
-# in its last three seconds, and then the next sample fades in in 3 seconds.
-
 
 class CombineSources:
-    def __init__(self, *files, fade_frames=3, wave_open=None):
+    def __init__(self, fade_frames, *files, wave_open=None):
         self.files = list(files)
         self.fade_frames = fade_frames
         self.wave_open = wave_open
