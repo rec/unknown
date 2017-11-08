@@ -57,4 +57,5 @@ def compare(expected, actual, test):
     if expected != actual:
         for a in actual:
             print('(0x%04x, 0x%04x),' % a)
+        test.assertEqual(len(expected), len(actual))
         test.assertEqual(expected, actual)
