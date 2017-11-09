@@ -14,20 +14,17 @@ class Rotations:
 
     def find(self, rotation):
         rotation = rotation % 1
+
+        # Find the first index greater than rotation.
         for i, r in enumerate(self.rotations):
-            if rotation < r:
+            if r > rotation:
                 break
         else:
-            r = 1 + self.rotations[0]
-            i = len(self.rotations)
+            i = 0
 
-        prev = self.rotations[i - 1]
-        if not i:
-            prev -= 1
-
-        width = r - prev
-        ratio = (rotation - prev) / width
+        r1, r2 = self.rotations[i - 1], self.rotations[i]
+        width = (r2 - r1) % 1
+        consumed = (rotation - r1) % 1
+        ratio = consumed / width
         assert 0 <= ratio < 1, str(ratio)
-        if i:
-            return i - 1, ratio
-        return len(self.rotations) - 1, ratio
+        return i - 1, ratio
