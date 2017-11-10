@@ -1,6 +1,19 @@
+from unknown.combine_sources import CombineSources
+
 FILES = {
     'simple.wav': (
         (0x0000, 0x0000),
+    ),
+
+    'dc.wav': (
+        (0x5000, 0x5000),
+        (0x5000, 0x5000),
+        (0x5000, 0x5000),
+        (0x5000, 0x5000),
+        (0x5000, 0x5000),
+        (0x5000, 0x5000),
+        (0x5000, 0x5000),
+        (0x5000, 0x5000),
     ),
 
     'biramp.wav': (
@@ -59,3 +72,7 @@ def compare(expected, actual, test):
             print('(0x%04x, 0x%04x),' % a)
         test.assertEqual(len(expected), len(actual))
         test.assertEqual(expected, actual)
+
+
+def combine(fade_frames, *files):
+    return CombineSources(fade_frames, *files, wave_open=MockWave)

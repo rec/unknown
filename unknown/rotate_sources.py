@@ -1,4 +1,3 @@
-import numpy
 from . import constants, rotations
 
 FRAMES_PER_MINUTE = 60 * constants.FRAME_RATE
@@ -24,11 +23,16 @@ def rotate_sources(ins, outs, speeds, in_rotations=None, out_rotations=None):
     except TypeError:
         speeds = tuple(speeds / FRAMES_PER_MINUTE for i in ins)
 
-    out_frames = numpy.zeros((len(outs), 2))
-
     for frame_index, frames in enumerate(zip(*ins)):
-        out_frames.fill(0)
+        out_frames = [0] * len(outs)
         for frame, speed, rotation in zip(frames, speeds, in_rotations):
-            frame = numpy.array(frame)
-            index, ratio = out_rotations.find(rotation + frame_index * speed)
-            out_frames[index] = ratio  # WRONG
+            left, right = frame
+            rotation += frame_index * speed
+            for channel, offset in (left, 0), (right, 0.5):
+                index, ratio = out_rotations.find(rotation + offset)
+                out_frames[index] += ratio * channel
+                out_frames[index + 1] += (1 - ratio) * channel
+
+        for sample, out in zip(out_frames, outs):
+            sample = min(round(sample), 65535)
+            out.writeframes(reversed(divmod(sample, 256)))

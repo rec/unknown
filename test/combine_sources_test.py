@@ -1,14 +1,10 @@
 import unittest
 from . import mocks
-from unknown import combine_sources
 
 
 class CombineSourcesTest(unittest.TestCase):
     def run_test(self, expected, fade_frames, *files):
-        combined = combine_sources.CombineSources(
-            fade_frames, *files,
-            wave_open=mocks.MockWave)
-        mocks.compare(expected, combined, self)
+        mocks.compare(expected, mocks.combine(fade_frames, *files), self)
 
     def test_empty(self):
         self.run_test((), 0)
