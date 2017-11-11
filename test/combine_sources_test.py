@@ -30,6 +30,12 @@ class CombineSourcesTest(unittest.TestCase):
         self.run_test(COMBINE_WITH_FADE, 3,
                       'biramp.wav', 'biramp.wav', 'biramp2.wav')
 
+    def test_dc_without_fade(self):
+        self.run_test(DC_WITHOUT_FADE, 0, 'dc.wav', 'dc.wav', 'dc.wav')
+
+    def test_dc_with_fade(self):
+        self.run_test(DC_WITH_FADE, 3, 'dc.wav', 'dc.wav', 'dc.wav')
+
 
 SINGLE = (
     (0x0000, 0xffff),
@@ -150,4 +156,27 @@ COMBINE_WITH_FADE = (
     (0x1d55, 0xcd54),
     (0x0955, 0x8bff),
     (0x0000, 0x4000),
+)
+
+DC_WITHOUT_FADE = ((0x5000, 0x5000),) * 24
+
+DC_WITH_FADE = (
+    (0x0000, 0x0000),
+    (0x1aab, 0x1aab),
+    (0x3555, 0x3555),
+    (0x5000, 0x5000),
+    (0x5000, 0x5000),
+    (0x4955, 0x92aa),  # WRONG
+    (0x4956, 0x5d56),  # WRONG
+    (0x4955, 0x2800),  # WRONG
+    (0x5000, 0x5000),
+    (0x5000, 0x5000),
+    (0x4955, 0x92aa),  # WRONG
+    (0x4956, 0x5d56),  # WRONG
+    (0x4955, 0x2800),  # WRONG
+    (0x5000, 0x5000),
+    (0x5000, 0x5000),
+    (0x4955, 0x4955),
+    (0x2eab, 0x2eab),
+    (0x1400, 0x1400),
 )
