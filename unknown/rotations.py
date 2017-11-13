@@ -23,8 +23,11 @@ class Rotations:
             i = 0
 
         r1, r2 = self.rotations[i - 1], self.rotations[i]
+
         width = (r2 - r1) % 1
         consumed = (rotation - r1) % 1
+
         ratio = consumed / width
         assert 0 <= ratio < 1, str(ratio)
+
         return i - 1, ratio
