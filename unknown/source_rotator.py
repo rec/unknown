@@ -1,6 +1,6 @@
 from . import constants, rotations
 
-FRAMES_PER_MINUTE = 60 * constants.FRAME_RATE
+FRAMES_PER_MINUTE = 60 * constants.FRAMERATE
 
 
 def source_rotator(ins, outs, speeds, in_rotations=None, out_rotations=None):
