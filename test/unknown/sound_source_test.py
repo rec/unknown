@@ -23,7 +23,7 @@ class SoundSourceTest(unittest.TestCase):
             (0x3000, 0xcfff),
             (0x4000, 0xbfff),
             (0x5000, 0xafff),
-            (0x5800, 0x92aa),
-            (0x4155, 0x53ff),
-            (0x2000, 0x2000),
+            (0x6000, 0x9fff),
+            (0x4aab, 0x5fff),
+            (0x2aab, 0x2aaa),
             fade_frames=3)

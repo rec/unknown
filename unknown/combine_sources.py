@@ -35,7 +35,7 @@ class CombineSources:
 
         l1, r1 = frame
         l2, r2 = next(self.incoming_source)
-        return l1 + l2, r1 + r1
+        return l1 + l2, r1 + r2
 
     def next_source(self):
         return self.files and sound_source.SoundSource(

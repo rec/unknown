@@ -39,7 +39,7 @@ class SoundSource:
         if self.in_fade_in():
             fade = self.byte_index / self.fade_in_bytes
         elif self.in_fade_out():
-            remaining = len(self.frames) - 1 - self.byte_index
+            remaining = len(self.frames) - self.byte_index
             fade = remaining / self.fade_in_bytes
         else:
             fade = 1
