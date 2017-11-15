@@ -1,13 +1,6 @@
-import wave, json, sys
-from . import combine_sources, constants, get_files, source_rotator
-
-
-def open_wave_for_write(filename):
-    fp = wave.open(filename, 'wb')
-    fp.setnchannels(constants.NCHANNELS_OUT)
-    fp.setsampwidth(constants.SAMPWIDTH)
-    fp.setframerate(constants.FRAMERATE)
-    return fp
+import json, sys
+from . import (
+    combine_sources, constants, get_files, source_rotator, wave_writer)
 
 
 def rotate_score(ins, outs, fade=constants.DEFAULT_FADE_TIME, **kwds):
@@ -17,20 +10,30 @@ def rotate_score(ins, outs, fade=constants.DEFAULT_FADE_TIME, **kwds):
     outs -- either a base filename or a list of files.
     kwds -- are passed to source_rotator
     """
+    print('rotate_score', kwds)
+    print('ins', ins)
+    print('outs', outs)
+    print('fade', fade)
 
     fade_frames = fade / constants.FRAMERATE
 
     ins = [[i] if isinstance(i, str) else i for i in ins]
-    ins = [get_files.get_all_files(i) for i in ins]
+    print('Finding files')
+    ins = [list(get_files.get_all_files(i)) for i in ins]
+    print('File counts are', *[len(i) for i in ins])
+
     ins = [combine_sources.CombineSources(fade_frames, *i) for i in ins]
 
+    print('opening outputs')
     outs = [get_files.normalize(o) for o in outs]
-    outs = [open_wave_for_write(o) for o in outs]
+    outs = [wave_writer.WaveWriter(o) for o in outs]
 
+    print('rotating')
     source_rotator.source_rotator(ins, outs, **kwds)
 
 
 def rotate_score_file(filename='score.json'):
+    print('rotate_score_file', filename)
     rotate_score(**json.load(open(filename)))
 
 

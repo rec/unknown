@@ -7,8 +7,8 @@ class MockOutput:
     def __init__(self):
         self.results = []
 
-    def writeframes(self, frame):
-        self.results.append(frame)
+    def writeframe(self, left, right):
+        self.results.append((left, right))
 
 
 class RotateSourcesTest(unittest.TestCase):

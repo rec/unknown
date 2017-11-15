@@ -23,6 +23,9 @@ def get_files(root='samples', verbose=False):
 
 def get_all_files(files):
     for file in files:
+        if not os.path.exists(file):
+            raise ValueError('File %s does not exist!' % file)
+
         file = normalize(file)
         if is_audio_file(file):
             yield file

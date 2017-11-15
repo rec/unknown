@@ -3,10 +3,11 @@ from . import constants, rotations
 FRAMES_PER_MINUTE = 60 * constants.FRAMERATE
 
 
-def source_rotator(ins, outs, speeds,
+def source_rotator(ins, outs, speeds=constants.DEFAULT_ROTATION_SPEED,
                    in_rotations=None, out_rotations=None, stereo_spread=None):
     """
-    rotation units are 1.0 == 360 degrees
+    rotations have 1.0 meaning a full rotation (360 degrees)
+
     Arguments:
       speeds -- rotation speed in rotations per minute (rpms).
           speeds can either be a single value in which case it's the same for
@@ -43,4 +44,4 @@ def source_rotator(ins, outs, speeds,
         for sample, out in zip(out_frames, outs):
             round_sample = min(round(sample), 65535)
             high, low = divmod(round_sample, 256)
-            out.writeframes((low, high))
+            out.writeframe(low, high)
