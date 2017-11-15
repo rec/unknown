@@ -40,7 +40,7 @@ def source_rotator(ins, outs, speeds,
                 out_frames[index] += ratio * channel
                 out_frames[index + 1] += (1 - ratio) * channel
 
-        for i, (sample, out) in enumerate(zip(out_frames, outs)):
+        for sample, out in zip(out_frames, outs):
             round_sample = min(round(sample), 65535)
             high, low = divmod(round_sample, 256)
             out.writeframes((low, high))

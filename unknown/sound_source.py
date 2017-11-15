@@ -2,20 +2,12 @@ import wave
 from . import constants
 
 
-def open_wave_for_write(filename):
-    fp = wave.open(filename, 'wb')
-    fp.setnchannels(constants.NCHANNELS)
-    fp.setsampwidth(constants.SAMPWIDTH)
-    fp.setframerate(constants.FRAMERATE)
-    return fp
-
-
 class SoundSource:
     def __init__(self, file, fade_frames, wave_open=None):
         self.byte_index = 0
         with (wave_open or wave.open)(file) as fp:
             self.frames = fp.readframes(fp.nframes())
-        self.fade_in_bytes = fade_frames * constants.FRAME_SIZE
+        self.fade_in_bytes = fade_frames * constants.FRAME_SIZE_IN
         self.fade_out_bytes = len(self.frames) - self.fade_in_bytes
 
     def in_fade_out(self):
