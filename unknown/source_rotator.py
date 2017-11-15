@@ -17,43 +17,30 @@ def source_rotator(ins, outs, speeds,
     in_rotations = in_rotations or [i / len(ins) for i in range(len(ins))]
     out_rotations = out_rotations or [i / len(outs) for i in range(len(outs))]
     out_rotations = rotations.Rotations(out_rotations)
+
     if stereo_spread is None:
         stereo_spread = 1 / len(outs)
     spread = stereo_spread / 2
 
     # Convert speeds from rpms to rotations per frame
     try:
-        speeds = tuple(s / FRAMES_PER_MINUTE for s in speeds)
+        speeds = [s / FRAMES_PER_MINUTE for s in speeds]
     except TypeError:
-        speeds = tuple(speeds / FRAMES_PER_MINUTE for i in ins)
+        speeds = [speeds / FRAMES_PER_MINUTE for i in ins]
 
     for frame_index, frames in enumerate(zip(*ins)):
-        def pf(frame):
-            return '(0x%04x, 0x%04x)' % frame
-
-        print()
-        print(frame_index)
-        print('source_rotator frames', [pf(f) for f in frames])
-
         out_frames = [0] * len(outs)
+
         for frame, speed, rotation in zip(frames, speeds, in_rotations):
             left, right = frame
             rotation += frame_index * speed
+
             for channel, offset in (left, -spread), (right, spread):
                 index, ratio = out_rotations.find(rotation + offset)
-
-                print('rotating', index, '%4.2f' % ratio,
-                      hex(channel), '%5.3f' % rotation, offset)
-                print('%5.3f' % (ratio * channel),
-                      '%5.3f' % ((1 - ratio) * channel))
-
                 out_frames[index] += ratio * channel
                 out_frames[index + 1] += (1 - ratio) * channel
 
         for i, (sample, out) in enumerate(zip(out_frames, outs)):
             round_sample = min(round(sample), 65535)
-            frames = tuple(reversed(divmod(round_sample, 256)))
-
-            print('source_rotator', i, hex(round_sample), frames)
-
-            out.writeframes(frames)
+            high, low = divmod(round_sample, 256)
+            out.writeframes((low, high))
