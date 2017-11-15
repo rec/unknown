@@ -103,4 +103,7 @@ ENV/
 samples/
 source_samples/
 
+*.AIF
+*.WAV
+*.aif
 *.wav
