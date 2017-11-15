@@ -3,7 +3,9 @@ from . import constants, rotations
 FRAMES_PER_MINUTE = 60 * constants.FRAMERATE
 
 
-def source_rotator(ins, outs, speeds, in_rotations=None, out_rotations=None):
+def source_rotator(
+        ins, outs, speeds, in_rotations=None, out_rotations=None,
+        left_right_offset=0.5):
     """
     rotation units are 1.0 == 360 degrees
     Arguments:
@@ -24,15 +26,27 @@ def source_rotator(ins, outs, speeds, in_rotations=None, out_rotations=None):
         speeds = tuple(speeds / FRAMES_PER_MINUTE for i in ins)
 
     for frame_index, frames in enumerate(zip(*ins)):
+        def pf(frame):
+            return '(0x%04x, 0x%04x)' % frame
+
+        print()
+        print(frame_index)
+        print('source_rotator frames', [pf(f) for f in frames])
         out_frames = [0] * len(outs)
         for frame, speed, rotation in zip(frames, speeds, in_rotations):
             left, right = frame
             rotation += frame_index * speed
-            for channel, offset in (left, 0), (right, 0.5):
+            for channel, offset in (left, 0), (right, left_right_offset):
                 index, ratio = out_rotations.find(rotation + offset)
+                print('rotating', index, '%4.2f' % ratio,
+                      hex(channel), '%5.3f' % rotation, offset)
+                print('%5.3f' % (ratio * channel),
+                      '%5.3f' % ((1 - ratio) * channel))
                 out_frames[index] += ratio * channel
                 out_frames[index + 1] += (1 - ratio) * channel
 
-        for sample, out in zip(out_frames, outs):
-            sample = min(round(sample), 65535)
-            out.writeframes(reversed(divmod(sample, 256)))
+        for i, (sample, out) in enumerate(zip(out_frames, outs)):
+            round_sample = min(round(sample), 65535)
+            result = tuple(reversed(divmod(round_sample, 256)))
+            print('source_rotator', i, hex(round_sample), result)
+            out.writeframes(result)
