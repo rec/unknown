@@ -4,7 +4,7 @@ FRAMES_PER_MINUTE = 60 * constants.FRAMERATE
 
 
 def _python_rotator(ins, outs, speeds, in_rotations, out_rotations, spread):
-    ins = [combine_sources.CombineSources(fade_frames, *i) for i in ins]
+    ins = [combine_sources.CombineSources(*i) for i in ins]
 
     print('opening outputs')
     outs = [wave_writer.WaveWriter(o) for o in outs]
@@ -40,6 +40,7 @@ def source_rotator(
           negative speeds ("counterclockwise") are also possible.
 
     """
+    print('!!!', ins)
     in_rotations = in_rotations or [i / len(ins) for i in range(len(ins))]
     out_rotations = out_rotations or [i / len(outs) for i in range(len(outs))]
     out_rotations = rotations.Rotations(out_rotations)

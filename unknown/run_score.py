@@ -15,7 +15,8 @@ def rotate_score(ins, outs, fade=constants.DEFAULT_FADE_TIME,
     print('outs', outs)
     print('fade', fade)
 
-    fade_frames = fade / constants.FRAMERATE
+    if not use_numpy:
+        fade /= constants.FRAMERATE
 
     ins = [[i] if isinstance(i, str) else i for i in ins]
     print('Finding files')
@@ -24,7 +25,7 @@ def rotate_score(ins, outs, fade=constants.DEFAULT_FADE_TIME,
 
     outs = [get_files.normalize(o) for o in outs]
     rotator = use_numpy and numpy_rotator.rotate
-    source_rotator.source_rotator(rotator, ins, outs, fade_frames, **kwds)
+    source_rotator.source_rotator(ins, outs, rotator, fade, **kwds)
 
 
 def rotate_score_file(filename='score.json'):

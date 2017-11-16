@@ -39,8 +39,9 @@ class CombineSources:
         return l1 + l2, r1 + r2
 
     def next_source(self):
-        if self.files:
-            file = self.files.pop(0)
-            print('Reading file',
-        return self.files and sound_source.SoundSource(
-            , self.fade_frames, self.wave_open)
+        pass
+        # if self.files:
+        #     file = self.files.pop(0)
+        #     print('Reading file',
+        # return self.files and sound_source.SoundSource(
+        #     self.fade_frames, self.wave_open)
