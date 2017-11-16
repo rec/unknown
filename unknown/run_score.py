@@ -1,9 +1,9 @@
 import json, sys
-from . import (
-    combine_sources, constants, get_files, source_rotator, wave_writer)
+from . import constants, get_files, numpy_rotator, source_rotator
 
 
-def rotate_score(ins, outs, fade=constants.DEFAULT_FADE_TIME, **kwds):
+def rotate_score(ins, outs, fade=constants.DEFAULT_FADE_TIME,
+                 use_numpy=True, **kwds):
     """
     Arguments:
     ins -- a list of lists of files or directories.
@@ -20,16 +20,11 @@ def rotate_score(ins, outs, fade=constants.DEFAULT_FADE_TIME, **kwds):
     ins = [[i] if isinstance(i, str) else i for i in ins]
     print('Finding files')
     ins = [list(get_files.get_all_files(i)) for i in ins]
-    print('File counts are', *[len(i) for i in ins])
+    print('Input file counts are', *[len(i) for i in ins])
 
-    ins = [combine_sources.CombineSources(fade_frames, *i) for i in ins]
-
-    print('opening outputs')
     outs = [get_files.normalize(o) for o in outs]
-    outs = [wave_writer.WaveWriter(o) for o in outs]
-
-    print('rotating')
-    source_rotator.source_rotator(ins, outs, **kwds)
+    rotator = use_numpy and numpy_rotator.rotate
+    source_rotator.source_rotator(rotator, ins, outs, fade_frames, **kwds)
 
 
 def rotate_score_file(filename='score.json'):
