@@ -40,7 +40,6 @@ def source_rotator(
           negative speeds ("counterclockwise") are also possible.
 
     """
-    print('!!!', ins)
     in_rotations = in_rotations or [i / len(ins) for i in range(len(ins))]
     out_rotations = out_rotations or [i / len(outs) for i in range(len(outs))]
     out_rotations = rotations.Rotations(out_rotations)
