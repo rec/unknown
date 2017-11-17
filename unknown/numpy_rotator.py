@@ -67,9 +67,12 @@ def rotate(ins, outs, speeds, in_rotations, out_rotations, spread, gap=0,
         for out, out_rotation in zip(output_samples, out_rotations):
             # This one line is the key calculation and I am a little insecure
             # about it.
-            offset = round(((rotation - out_rotation) % 1) * FRAMERATE)
-            out[frames:frames + len(channel)] += (
-                curve[offset:offset + len(channel)] * channel)
+            rot = (rotation - out_rotation) % 1
+
+            offset = round(rot * FRAMERATE)
+            remaining = len(out) - frames
+            c = channel if (len(channel) <= remaining) else channel[:remaining]
+            out[frames:frames + len(c)] += c * curve[offset:offset + len(c)]
 
     out_rotations = out_rotations.rotations
 
@@ -95,4 +98,4 @@ def rotate(ins, outs, speeds, in_rotations, out_rotations, spread, gap=0,
         apply_fade(s)
 
     for file, data in zip(outs, output_samples):
-        write_outputs(file, data)
+        write_output(file, data)
