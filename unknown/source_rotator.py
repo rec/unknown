@@ -29,7 +29,7 @@ def _python_rotator(ins, outs, speeds, in_rotations, out_rotations, spread):
 
 def source_rotator(
         ins, outs, rotator=None, speeds=constants.DEFAULT_ROTATION_SPEED,
-        in_rotations=None, out_rotations=None, stereo_spread=None):
+        in_rotations=None, out_rotations=None, stereo_spread=None, **kwds):
     """
     rotations have 1.0 meaning a full rotation (360 degrees)
 
@@ -55,4 +55,4 @@ def source_rotator(
         speeds = [speeds / FRAMES_PER_MINUTE for i in ins]
 
     (rotator or _python_rotator)(
-        ins, outs, speeds, in_rotations, out_rotations, spread)
+        ins, outs, speeds, in_rotations, out_rotations, spread, **kwds)

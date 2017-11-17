@@ -1,6 +1,7 @@
 import numpy as np
-import math, wavio, wave
+import math, os, traceback, wavio, wave
 from . import constants
+from . import file_durations
 
 FRAMERATE = constants.FRAMERATE
 
@@ -37,13 +38,13 @@ def rotate(ins, outs, speeds, in_rotations, out_rotations, spread, gap=0,
         curve[:segment] = linspace(0, 1, segment)
         curve[segment:2 * segment] = linspace(1, 0, segment)
 
-        copy_count = 1 + math.floor(max_source_length / len(curve))
-        return np.tile(curve, copy_count)
+        copy_count = 2 * math.floor(max_source_length / len(curve))
+        return len(curve), np.tile(curve, copy_count)
 
     def read_file(file):
-        print('Reading', file, '....', end='')
+        # print('Reading', short_filename(file), '....', end='')
         wave = wavio.read(file)
-        print(' done')
+        # print(' done')
         assert wave.sampwidth == 2 and wave.rate == FRAMERATE
 
         return [apply_fade(wave.data[:, i].astype(dtype)) for i in (0, 1)]
@@ -57,22 +58,41 @@ def rotate(ins, outs, speeds, in_rotations, out_rotations, spread, gap=0,
         frames = 0
         curve = make_rotation(speed)
         for file in files:
-            left, right = read_file(file)
-            for channel, cspread in (left, -spread), (right, spread):
-                mix_channel(channel, cspread + in_rotation, frames, curve)
+            if frames >= length:
+                print('Skipping', short_filename(file))
+                continue
+            print(format_time(frames, True), short_filename(file))
+            try:
+                left, right = read_file(file)
+            except:
+                print('Failed to open file', file)
+                traceback.print_exc()
+                continue
+
+            try:
+                for channel, cspread in (left, -spread), (right, spread):
+                    mix_channel(channel, cspread + in_rotation, frames, *curve)
+            except:
+                print('Failed to mix in file', file)
+                traceback.print_exc()
+                continue
 
             frames += len(left) + gap
 
-    def mix_channel(channel, rotation, frames, curve):
+    def mix_channel(channel, rotation, frames, rotation_length, curve):
         for out, out_rotation in zip(output_samples, out_rotations):
-            # This one line is the key calculation and I am a little insecure
-            # about it.
-            rot = (rotation - out_rotation) % 1
-
-            offset = round(rot * FRAMERATE)
+            rot = (rotation + out_rotation) % 1
+            offset = round(rot * rotation_length)
             remaining = len(out) - frames
             c = channel if (len(channel) <= remaining) else channel[:remaining]
             out[frames:frames + len(c)] += c * curve[offset:offset + len(c)]
+
+    def short_filename(file):
+        short = 'africa' if '/africa/' in file else 'berlin'
+        return os.path.join(short, os.path.basename(file))
+
+    def format_time(frames, use_hours=False):
+        return file_durations.format_time(frames / FRAMERATE, use_hours)
 
     out_rotations = out_rotations.rotations
 
@@ -84,6 +104,12 @@ def rotate(ins, outs, speeds, in_rotations, out_rotations, spread, gap=0,
 
     total_length, max_source_length = lengths()
     length = round(FRAMERATE * length) if length else total_length
+    total_time = format_time(length, True)
+    max_source_time = format_time(max_source_length)
+
+    print('Number of sources', *[len(i) for i in ins])
+    print('Length of output', total_time)
+    print('Max source time', max_source_time)
 
     output_samples = np.zeros((len(outs), length), dtype=dtype)
 

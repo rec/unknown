@@ -1,8 +1,11 @@
 {
     "ins": [
-        "/development/unknown/samples/berlin/11625__balou82__berlin-street-1/184354__balou82__berlin-street-short-car-motor-atmo.wav",
-        "/development/unknown/samples/africa/10716__felix-blume__mali/131923__felix-blume__muezzin-are-calling-for-the-morning-prayer-in-the-small-village-of-diafarabe-mali.wav"
+        "samples/berlin",
+        "samples/africa"
     ],
+
+    "fade": 4,
+    "gap": 2,
 
     "outs": [
         "test1.aif",
