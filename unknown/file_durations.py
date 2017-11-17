@@ -1,4 +1,4 @@
-import pydub, sys, wave
+import pydub, sys
 from . import get_files, util
 
 
