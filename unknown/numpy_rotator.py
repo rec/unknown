@@ -38,7 +38,8 @@ def rotate(ins, outs, speeds, in_rotations, out_rotations, spread, gap=0,
         curve[:segment] = linspace(0, 1, segment)
         curve[segment:2 * segment] = linspace(1, 0, segment)
 
-        copy_count = 2 * math.floor(max_source_length / len(curve))
+        # TODO: this is a huge overestimate
+        copy_count = 2 + 2 * math.floor(max_source_length / len(curve))
         return len(curve), np.tile(curve, copy_count)
 
     def read_file(file):

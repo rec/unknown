@@ -2,8 +2,7 @@ import json, sys
 from . import constants, get_files, numpy_rotator, source_rotator
 
 
-def rotate_score(ins, outs, fade=constants.DEFAULT_FADE_TIME,
-                 use_numpy=True, **kwds):
+def rotate_score(ins, outs, fade=constants.FADE_TIME, use_numpy=True, **kwds):
     """
     Arguments:
     ins -- a list of lists of files or directories.
