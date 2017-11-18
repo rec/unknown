@@ -1,6 +1,3 @@
-from . import sound_source
-
-
 class CombineSources:
     def __init__(self, fade_frames, *files, wave_open=None, verbose=True):
         self.files = list(files)

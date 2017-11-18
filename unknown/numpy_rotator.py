@@ -40,6 +40,8 @@ def rotate(ins, outs, speeds, in_rotations, out_rotations, spread, gap=0,
 
         # TODO: this is a huge overestimate
         copy_count = 2 + 2 * math.floor(max_source_length / len(curve))
+        print('Rotation for speed', speed, 'is',
+              len(curve), format_time(len(curve)))
         return len(curve), np.tile(curve, copy_count)
 
     def read_file(file):
@@ -65,27 +67,39 @@ def rotate(ins, outs, speeds, in_rotations, out_rotations, spread, gap=0,
             print(format_time(frames, True), short_filename(file))
             try:
                 left, right = read_file(file)
+            except KeyboardInterrupt:
+                raise
             except:
-                print('Failed to open file', file)
+                print('ERROR: Failed to open file', file)
                 traceback.print_exc()
                 continue
 
             try:
                 for channel, cspread in (left, -spread), (right, spread):
                     mix_channel(channel, cspread + in_rotation, frames, *curve)
+            except KeyboardInterrupt:
+                raise
             except:
-                print('Failed to mix in file', file)
+                print('ERROR: Failed to mix in file', file)
                 traceback.print_exc()
                 continue
 
             frames += len(left) + gap
 
     def mix_channel(channel, rotation, frames, rotation_length, curve):
+        print('mix_channel', rotation, format_time(rotation_length))
         for out, out_rotation in zip(output_samples, out_rotations):
             rot = (rotation + out_rotation) % 1
             offset = round(rot * rotation_length)
             remaining = len(out) - frames
             c = channel if (len(channel) <= remaining) else channel[:remaining]
+            print('   ',
+                  out_rotation, rot,
+                  format_time(offset),
+                  format_time(remaining),
+                  format_time(len(c)),
+                  format_time(frames),
+                  )
             out[frames:frames + len(c)] += c * curve[offset:offset + len(c)]
 
     def short_filename(file):
