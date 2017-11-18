@@ -4,10 +4,11 @@ from . import constants
 from . import file_durations
 
 FRAMERATE = constants.FRAMERATE
+MIN, MAX = -0x8000, 0x7fff
 
 
 def rotate(ins, outs, speeds, in_rotations, out_rotations, spread, gap=0,
-           length=0, fade=0, dtype='float'):
+           length=0, fade=0, dtype='float', scale=None):
     def lengths():
         min_total_length, max_source_length = float('inf'), 0
         for files in ins:
@@ -28,71 +29,61 @@ def rotate(ins, outs, speeds, in_rotations, out_rotations, spread, gap=0,
     def linspace(start, stop, num):
         return np.linspace(start, stop, num, endpoint=False, dtype=dtype)
 
-    def make_rotation(speed):
+    def make_rotation(rotation_frames):
         # Compute the rotation curve, a sawtooth-like thing.
-        segment_count = 1 + len(outs)
-        segment = round(1 / (speed * segment_count))
-
-        curve = np.zeros(segment_count * segment, dtype=dtype)
+        segment = round(rotation_frames / len(outs))
+        curve = np.zeros(segment * len(outs), dtype=dtype)
 
         curve[:segment] = linspace(0, 1, segment)
         curve[segment:2 * segment] = linspace(1, 0, segment)
 
         # TODO: this is a huge overestimate
         copy_count = 2 + 2 * math.floor(max_source_length / len(curve))
-        print('Rotation for speed', speed, 'is',
-              len(curve), format_time(len(curve)))
         return len(curve), np.tile(curve, copy_count)
 
     def read_file(file):
-        # print('Reading', short_filename(file), '....', end='')
         wave = wavio.read(file)
-        # print(' done')
         assert wave.sampwidth == 2 and wave.rate == FRAMERATE
 
         return [apply_fade(wave.data[:, i].astype(dtype)) for i in (0, 1)]
 
     def write_output(file, data):
-        print('Writing', file, '....', end='')
+        print('Writing', file, '....')
         wavio.write(file, data, FRAMERATE, scale='none', sampwidth=2)
-        print(' done')
 
-    def mix_one_input(files, speed, in_rotation):
+    def mix_one_input(files, in_rotation):
         frames = 0
-        curve = make_rotation(speed)
         for file in files:
             if frames >= length:
                 print('Skipping', short_filename(file))
                 continue
+            rotation = in_rotation + frames / rotation_frames
             print(format_time(frames, True), short_filename(file))
             try:
+                state = 'open file'
                 left, right = read_file(file)
-            except KeyboardInterrupt:
-                raise
-            except:
-                print('ERROR: Failed to open file', file)
-                traceback.print_exc()
-                continue
 
-            try:
+                state = 'mix file'
                 for channel, cspread in (left, -spread), (right, spread):
-                    mix_channel(channel, cspread + in_rotation, frames, *curve)
+                    mix_channel(channel, cspread + rotation, frames)
             except KeyboardInterrupt:
                 raise
             except:
-                print('ERROR: Failed to mix in file', file)
+                print('ERROR: Failed to', state, file)
                 traceback.print_exc()
                 continue
 
             frames += len(left) + gap
 
-    def mix_channel(channel, rotation, frames, rotation_length, curve):
+    def mix_channel(channel, rotation, frames):
         print('mix_channel', rotation, format_time(rotation_length))
+
         for out, out_rotation in zip(output_samples, out_rotations):
             rot = (rotation + out_rotation) % 1
-            offset = round(rot * rotation_length)
+            offset = round(rot * rotation_frames)
             remaining = len(out) - frames
             c = channel if (len(channel) <= remaining) else channel[:remaining]
+
             print('   ',
                   out_rotation, rot,
                   format_time(offset),
@@ -100,7 +91,9 @@ def rotate(ins, outs, speeds, in_rotations, out_rotations, spread, gap=0,
                   format_time(len(c)),
                   format_time(frames),
                   )
-            out[frames:frames + len(c)] += c * curve[offset:offset + len(c)]
+
+            out[frames:frames + len(c)] += (
+                c * rotation_curve[offset:offset + len(c)])
 
     def short_filename(file):
         short = 'africa' if '/africa/' in file else 'berlin'
@@ -109,34 +102,46 @@ def rotate(ins, outs, speeds, in_rotations, out_rotations, spread, gap=0,
     def format_time(frames, use_hours=False):
         return file_durations.format_time(frames / FRAMERATE, use_hours)
 
+    def limit(ins, scale, samples):
+        for s in samples:
+            apply_fade(s)
+
+        if not scale:
+            scale = 1 / len(ins)
+
+        if scale != 1:
+            samples *= scale
+
+        limit_scale = max(1, samples.min() / MIN, samples.max() / MAX)
+        if limit_scale > 1:
+            print('WARNING: sample overs', limit_scale)
+            samples /= limit_scale
+
+    # Simplify legacy arguments
     out_rotations = out_rotations.rotations
-
-    assert len(ins) == len(speeds) == len(in_rotations)
-    assert len(outs) == len(out_rotations)
-
     gap = round(FRAMERATE * gap)
     fade = round(FRAMERATE * fade)
 
+    assert len(ins) == len(in_rotations)
+    assert len(outs) == len(out_rotations)
+
     total_length, max_source_length = lengths()
     length = round(FRAMERATE * length) if length else total_length
-    total_time = format_time(length, True)
-    max_source_time = format_time(max_source_length)
 
-    print('Number of sources', *[len(i) for i in ins])
-    print('Length of output', total_time)
-    print('Max source time', max_source_time)
+    print('Length of output', format_time(length, True))
+    print('Max source time', format_time(max_source_length))
 
     output_samples = np.zeros((len(outs), length), dtype=dtype)
+    rotation_frames, rotation_curve = make_rotation(1 / speeds[0])
 
     if fade:
         fade_in = linspace(0, 1, fade)
         fade_out = linspace(1, 0, fade)
 
-    for files, speed, in_rotation in zip(ins, speeds, in_rotations):
-        mix_one_input(files, speed, in_rotation)
+    for files, in_rotation in zip(ins, in_rotations):
+        mix_one_input(files, in_rotation)
 
-    for s in output_samples:
-        apply_fade(s)
+    limit(ins, scale, output_samples)
 
     for file, data in zip(outs, output_samples):
         write_output(file, data)
