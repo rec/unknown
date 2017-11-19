@@ -29,7 +29,7 @@ def _python_rotator(ins, outs, speeds, in_rotations, out_rotations, spread):
 
 def source_rotator(
         ins, outs, rotator=None,
-        rotation_periods=constants.SECONDS_PER_ROTATION,
+        rotation_period=constants.SECONDS_PER_ROTATION,
         in_rotations=None, out_rotations=None, spread=None, **kwds):
     """
     rotations have 1.0 meaning a full rotation (360 degrees)
@@ -49,12 +49,12 @@ def source_rotator(
         spread = 1 / (2 * len(outs))
 
     try:
-        len(rotation_periods)
+        len(rotation_period)
     except TypeError:
-        rotation_periods = [rotation_periods] * len(ins)
+        rotation_period = [rotation_period] * len(ins)
 
     # Convert speeds from rpms to rotations per frame
-    speeds = [1 / (r * constants.FRAMERATE) for r in rotation_periods]
+    speeds = [1 / (r * constants.FRAMERATE) for r in rotation_period]
 
     (rotator or _python_rotator)(
         ins, outs, speeds, in_rotations, out_rotations, spread, **kwds)

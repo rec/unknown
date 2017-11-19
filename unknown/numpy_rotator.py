@@ -1,14 +1,16 @@
 import numpy as np
-import math, os, traceback, wavio, wave
+import json, math, os, sys, traceback, wavio, wave
 from . import constants
 from . import file_durations
 
 FRAMERATE = constants.FRAMERATE
 MIN, MAX = -0x8000, 0x7fff
+DEBUG = False
 
 
 def rotate(ins, outs, speeds, in_rotations, out_rotations, spread, gap=0,
-           length=0, fade=0, dtype='float', scale=None):
+           length=0, fade=0, dtype='float', scale=None, rotation_period=10,
+           combined=None):
     def lengths():
         min_total_length, max_source_length = float('inf'), 0
         for files in ins:
@@ -29,8 +31,14 @@ def rotate(ins, outs, speeds, in_rotations, out_rotations, spread, gap=0,
     def linspace(start, stop, num):
         return np.linspace(start, stop, num, endpoint=False, dtype=dtype)
 
-    def make_rotation(rotation_frames):
+    def make_rotation(rotation_period):
         # Compute the rotation curve, a sawtooth-like thing.
+        if rotation_period is None:
+            rotation_frames = FRAMERATE / speeds[0]
+        else:
+            rotation_frames = rotation_period * FRAMERATE
+        print(hex(int(rotation_frames)), rotation_frames)
+        assert rotation_frames < 1000000000
         segment = round(rotation_frames / len(outs))
         curve = np.zeros(segment * len(outs), dtype=dtype)
 
@@ -48,6 +56,7 @@ def rotate(ins, outs, speeds, in_rotations, out_rotations, spread, gap=0,
         return [apply_fade(wave.data[:, i].astype(dtype)) for i in (0, 1)]
 
     def write_output(file, data):
+        os.makedirs(os.path.dirname(file), exist_ok=True)
         print('Writing', file, '....')
         wavio.write(file, data, FRAMERATE, scale='none', sampwidth=2)
 
@@ -57,7 +66,7 @@ def rotate(ins, outs, speeds, in_rotations, out_rotations, spread, gap=0,
             if frames >= length:
                 print('Skipping', short_filename(file))
                 continue
-            rotation = in_rotation + frames / rotation_frames
+            rotation = in_rotation + (frames / rotation_frames)
             print(format_time(frames, True), short_filename(file))
             try:
                 state = 'open file'
@@ -76,7 +85,7 @@ def rotate(ins, outs, speeds, in_rotations, out_rotations, spread, gap=0,
             frames += len(left) + gap
 
     def mix_channel(channel, rotation, frames):
-        print('mix_channel', rotation, format_time(rotation_length))
+        DEBUG and print('mix_channel', rotation)
 
         for out, out_rotation in zip(output_samples, out_rotations):
             rot = (rotation + out_rotation) % 1
@@ -84,13 +93,10 @@ def rotate(ins, outs, speeds, in_rotations, out_rotations, spread, gap=0,
             remaining = len(out) - frames
             c = channel if (len(channel) <= remaining) else channel[:remaining]
 
-            print('   ',
-                  out_rotation, rot,
-                  format_time(offset),
-                  format_time(remaining),
-                  format_time(len(c)),
-                  format_time(frames),
-                  )
+            DEBUG and print(
+                '   ', out_rotation, rot,
+                format_time(offset), format_time(remaining),
+                format_time(len(c)), format_time(frames))
 
             out[frames:frames + len(c)] += (
                 c * rotation_curve[offset:offset + len(c)])
@@ -128,11 +134,12 @@ def rotate(ins, outs, speeds, in_rotations, out_rotations, spread, gap=0,
     total_length, max_source_length = lengths()
     length = round(FRAMERATE * length) if length else total_length
 
-    print('Length of output', format_time(length, True))
-    print('Max source time', format_time(max_source_length))
-
     output_samples = np.zeros((len(outs), length), dtype=dtype)
-    rotation_frames, rotation_curve = make_rotation(1 / speeds[0])
+    rotation_frames, rotation_curve = make_rotation(rotation_period)
+
+    print('Length of output', format_time(length, True))
+    print('Rotation time', format_time(rotation_frames),
+          format_time(1 / speeds[0]))
 
     if fade:
         fade_in = linspace(0, 1, fade)
@@ -145,3 +152,12 @@ def rotate(ins, outs, speeds, in_rotations, out_rotations, spread, gap=0,
 
     for file, data in zip(outs, output_samples):
         write_output(file, data)
+
+    if combined:
+        samples = output_samples
+        samples[0] += (2 / 3) * samples[1] + (1 / 3) * samples[2]
+        samples[3] += (2 / 3) * samples[1] + (1 / 3) * samples[2]
+        samples[0] /= 2
+        samples[3] /= 2
+        stack = np.column_stack((samples[0], samples[3]))
+        write_output(combined, stack)

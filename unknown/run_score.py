@@ -24,7 +24,7 @@ def rotate_score(ins, outs, fade=constants.FADE_TIME, use_numpy=True, **kwds):
 
     outs = [get_files.normalize(o) for o in outs]
     rotator = use_numpy and numpy_rotator.rotate
-    source_rotator.source_rotator(ins, outs, rotator, fade, **kwds)
+    source_rotator.source_rotator(ins, outs, rotator, fade=fade, **kwds)
 
 
 def rotate_score_file(filename='score.json'):

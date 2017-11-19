@@ -1,16 +1,18 @@
 {
     "ins": [
-        "/development/unknown/samples/africa/10716__felix-blume__mali/133832__felix-blume__the-muezzin-is-calling-the-people-for-the-praying-in-this-small-village-on-the-niger-river-the-muezzin-still-call-without-sound-reinforcement-sound-recorder-close-to-the-muezzin.wav",
+        "/development/unknown/samples/africa/10716__felix-blume__mali/171445__felix-blume__wind-in-the-african-bush-mali.wav",
         "/development/unknown/samples/berlin/139957__nikitralala__echos-in-a-dome.wav"
     ],
 
     "fade": 4,
-    "gap": 2,
+    "gap": -2,
+    "rotation_period": 20,
+    "combined": "2/combined.aif",
 
     "outs": [
-        "test1.aif",
-        "test2.aif",
-        "test3.aif",
-        "test4.aif"
+        "2/test1.aif",
+        "2/test2.aif",
+        "2/test3.aif",
+        "2/test4.aif"
     ]
 }
