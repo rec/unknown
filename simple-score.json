@@ -7,12 +7,14 @@
     "fade": 4,
     "gap": -2,
     "rotation_period": 20,
-    "combined": "2/combined.aif",
+    "combined": "combined.wav",
+    "gain": 5,
+    "directory": "4/",
 
     "outs": [
-        "2/test1.aif",
-        "2/test2.aif",
-        "2/test3.aif",
-        "2/test4.aif"
+        "test1.aif",
+        "test2.aif",
+        "test3.aif",
+        "test4.aif"
     ]
 }

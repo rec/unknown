@@ -6,13 +6,14 @@
 
     "fade": 5,
     "gap": 3,
-    "rotation_period": 64,
-    "combined": "1/combined.aif",
+    "rotation_period": 128,
+    "combined": "combined.wav",
+    "directory": "short/",
 
     "outs": [
-        "1/HEIMAT1.AIF",
-        "1/HEIMAT2.AIF",
-        "1/HEIMAT3.AIF",
-        "1/HEIMAT4.AIF"
+        "HEIMAT1.WAV",
+        "HEIMAT2.WAV",
+        "HEIMAT3.WAV",
+        "HEIMAT4.WAV"
     ]
 }
